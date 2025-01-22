@@ -8,6 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -32,12 +43,23 @@ exports.signIn = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0,
         where: {
             email,
         },
+        include: { spaces: true },
     });
     if (user && (yield argon2_1.default.verify(user.password, password))) {
+        const { password } = user, safeUser = __rest(user, ["password"]);
         const jwt = (0, userController_1.signJwt)(user.id);
-        res.status(200).json({
+        res
+            .status(200)
+            .cookie("jwt", jwt, {
+            maxAge: 1000 * 60 * 60 * 24 * 90, // Cookie expiration in milliseconds (1 hour)
+            httpOnly: false, // Ensures the cookie is sent only over HTTP(S), not accessible via JavaScript
+            secure: true, // Ensures the cookie is sent over HTTPS (use false for local development)
+            sameSite: "none", // Prevents CSRF attacks by controlling when the cookie is sent
+        })
+            .json({
             status: "success",
             jwt,
+            data: Object.assign({}, safeUser),
         });
     }
     else {
@@ -50,6 +72,7 @@ exports.signUp = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0,
     const email = (_a = req.body.email) === null || _a === void 0 ? void 0 : _a.trim();
     const password = (_b = req.body.password) === null || _b === void 0 ? void 0 : _b.trim();
     const name = (_c = req.body.name) === null || _c === void 0 ? void 0 : _c.trim();
+    console.log(email, password, name);
     if (!validator_1.default.isEmail(email)) {
         next(new AppError_1.AppError("Please enter a valid email", 400));
         return;
@@ -66,6 +89,7 @@ exports.signUp = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0,
         where: {
             email,
         },
+        include: { spaces: true },
     });
     if (userExists) {
         next(new AppError_1.AppError("User by this email id already exists", 400));
@@ -88,7 +112,15 @@ exports.signUp = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0,
     });
     const token = (0, userController_1.signJwt)(user.id);
     // Send success response
-    res.status(201).json({
+    res
+        .status(201)
+        .cookie("jwt", token, {
+        maxAge: 1000 * 60 * 60 * 24 * 90, // Cookie expiration in milliseconds (1 hour)
+        httpOnly: false, // Ensures the cookie is sent only over HTTP(S), not accessible via JavaScript
+        secure: true, // Ensures the cookie is sent over HTTPS (use false for local development)
+        sameSite: "none", // Prevents CSRF attacks by controlling when the cookie is sent
+    })
+        .json({
         status: "success",
         data: Object.assign({}, user),
         token,

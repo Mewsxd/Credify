@@ -19,11 +19,12 @@ const catchAsync_1 = __importDefault(require("../util/catchAsync"));
 const AppError_1 = require("../util/AppError");
 const __1 = require("..");
 const getUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield __1.prisma.user.findFirst({
+    const user = yield __1.prisma.user.findUnique({
         where: {
             // @ts-ignore
             id: req.id,
         },
+        include: { spaces: true },
     });
     res.status(200).json({
         status: "success",

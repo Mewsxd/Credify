@@ -20,4 +20,37 @@ model User {
   name      String?                               // Optional name field
   createdAt DateTime @default(now())              // Timestamp for when the user was created
   updatedAt DateTime @updatedAt                   // Automatically updated timestamp
+  spaces    Space[]
+}
+
+model Testimony {
+  id         Int      @id @default(autoincrement())
+  spaceId    Int
+  review     String
+  name       String
+  email      String?  // Optional based on toggle
+  social     String?  // Optional based on toggle
+  rating     Int?  // Optional based on toggle
+  address    String?  // Optional based on toggle
+  company    String?  // Optional based on toggle
+  createdAt  DateTime @default(now())
+  space      Space    @relation(fields: [spaceId], references: [id])
+}
+
+model Space {
+  id                Int       @id @default(autoincrement())
+  title             String    @db.VarChar(100)
+  message           String  
+  createdAt         DateTime  @default(now()) 
+  questions         String[]
+  collectEmail      Boolean
+  collectCompany    Boolean
+  collectSocial     Boolean
+  collectAddress    Boolean
+  collectRating     Boolean
+  theme             Boolean
+  buttonColor       String?
+  user              User      @relation(fields: [userId], references: [id])
+  testimonies       Testimony[]
+  userId            Int        
 }

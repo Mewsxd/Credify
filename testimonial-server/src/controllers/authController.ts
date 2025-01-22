@@ -21,14 +21,25 @@ export const signIn = catchAsync(
       where: {
         email,
       },
+      include: { spaces: true },
     });
 
     if (user && (await argon2.verify(user.password, password))) {
+      const { password, ...safeUser } = user;
       const jwt = signJwt(user.id);
-      res.status(200).json({
-        status: "success",
-        jwt,
-      });
+      res
+        .status(200)
+        .cookie("jwt", jwt, {
+          maxAge: 1000 * 60 * 60 * 24 * 90, // Cookie expiration in milliseconds (1 hour)
+          httpOnly: false, // Ensures the cookie is sent only over HTTP(S), not accessible via JavaScript
+          secure: true, // Ensures the cookie is sent over HTTPS (use false for local development)
+          sameSite: "none", // Prevents CSRF attacks by controlling when the cookie is sent
+        })
+        .json({
+          status: "success",
+          jwt,
+          data: { ...safeUser },
+        });
     } else {
       next(new AppError("Invalid email or password", 404));
       return;
@@ -41,6 +52,7 @@ export const signUp = catchAsync(
     const email = req.body.email?.trim();
     const password = req.body.password?.trim();
     const name = req.body.name?.trim();
+    console.log(email, password, name);
 
     if (!validator.isEmail(email)) {
       next(new AppError("Please enter a valid email", 400));
@@ -61,6 +73,7 @@ export const signUp = catchAsync(
       where: {
         email,
       },
+      include: { spaces: true },
     });
     if (userExists) {
       next(new AppError("User by this email id already exists", 400));
@@ -84,12 +97,20 @@ export const signUp = catchAsync(
     const token: string = signJwt(user.id);
 
     // Send success response
-    res.status(201).json({
-      status: "success",
-      data: {
-        ...user,
-      },
-      token,
-    });
+    res
+      .status(201)
+      .cookie("jwt", token, {
+        maxAge: 1000 * 60 * 60 * 24 * 90, // Cookie expiration in milliseconds (1 hour)
+        httpOnly: false, // Ensures the cookie is sent only over HTTP(S), not accessible via JavaScript
+        secure: true, // Ensures the cookie is sent over HTTPS (use false for local development)
+        sameSite: "none", // Prevents CSRF attacks by controlling when the cookie is sent
+      })
+      .json({
+        status: "success",
+        data: {
+          ...user,
+        },
+        token,
+      });
   }
 );

@@ -5,11 +5,12 @@ import { AppError } from "../util/AppError";
 import { prisma } from "..";
 
 export const getUser = async (req: Request, res: Response) => {
-  const user = await prisma.user.findFirst({
+  const user = await prisma.user.findUnique({
     where: {
       // @ts-ignore
       id: req.id,
     },
+    include: { spaces: true },
   });
   res.status(200).json({
     status: "success",
