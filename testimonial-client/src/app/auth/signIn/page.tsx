@@ -16,8 +16,6 @@ import { Input } from "@/components/ui/input";
 import { server_url } from "@/util/http";
 import Link from "next/link";
 import axios from "axios";
-import { useContext } from "react";
-import MainContext from "@/store/MainContext";
 import { useMainContext } from "@/hooks/useMainContext";
 
 const formSchema = z.object({
@@ -39,7 +37,7 @@ const SignIn = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+    // console.log(values);
     const data = values;
     const res = await axios.post(server_url + "/auth/signIn", data, {
       headers: { "Content-Type": "application/json" },

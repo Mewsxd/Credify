@@ -8,6 +8,8 @@ import spaceRouter from "./routes/spaceRoutes";
 import testimonyRouter from "./routes/testimonyRoutes";
 import cors from "cors";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
+import supabase from "./util/supabase";
 
 export const prisma = new PrismaClient();
 const app = express();
@@ -16,7 +18,7 @@ app.use(morgan("dev"));
 app.listen(8000, () => {
   console.log("Listening on port 8000");
 });
-
+app.use(cookieParser());
 app.use(
   cors({
     origin: "http://localhost:3000", // Replace with your frontend's URL
@@ -51,6 +53,18 @@ app.use("/api/testimony", testimonyRouter);
 app.use("*", invalidRouteHandler);
 app.use(errorHandler);
 
+async function uploadFile(file) {
+  const { data, error } = await supabase.storage
+    .from("testimony-vids")
+    .upload("images", file);
+  if (error) {
+    console.error("Upload error", error);
+  } else {
+    console.log("File uploaded", data);
+  }
+}
+
+uploadFile("C:/Users/Shagufa/Pictures/logo.png");
 // async function main() {
 //   // ... you will write your Prisma Client queries here
 //   try {

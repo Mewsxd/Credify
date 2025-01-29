@@ -23,12 +23,15 @@ const spaceRoutes_1 = __importDefault(require("./routes/spaceRoutes"));
 const testimonyRoutes_1 = __importDefault(require("./routes/testimonyRoutes"));
 const cors_1 = __importDefault(require("cors"));
 const morgan_1 = __importDefault(require("morgan"));
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const supabase_1 = __importDefault(require("./util/supabase"));
 exports.prisma = new client_1.PrismaClient();
 const app = (0, express_1.default)();
 app.use((0, morgan_1.default)("dev"));
 app.listen(8000, () => {
     console.log("Listening on port 8000");
 });
+app.use((0, cookie_parser_1.default)());
 app.use((0, cors_1.default)({
     origin: "http://localhost:3000", // Replace with your frontend's URL
     credentials: true, // Allow cookies to be sent
@@ -57,6 +60,20 @@ app.use("/api/space", spaceRoutes_1.default);
 app.use("/api/testimony", testimonyRoutes_1.default);
 app.use("*", invalidRouteHandler_1.invalidRouteHandler);
 app.use(errorHandler_1.errorHandler);
+function uploadFile(file) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { data, error } = yield supabase_1.default.storage
+            .from("testimony-vids")
+            .upload("images", file);
+        if (error) {
+            console.error("Upload error", error);
+        }
+        else {
+            console.log("File uploaded", data);
+        }
+    });
+}
+uploadFile("C:/Users/Shagufa/Pictures/logo.png");
 // async function main() {
 //   // ... you will write your Prisma Client queries here
 //   try {

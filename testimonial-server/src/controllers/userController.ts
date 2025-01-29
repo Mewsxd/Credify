@@ -12,10 +12,15 @@ export const getUser = async (req: Request, res: Response) => {
     },
     include: { spaces: true },
   });
-  res.status(200).json({
-    status: "success",
-    data: user,
-  });
+  if (user) {
+    const { password, ...safeUser } = user; // Exclude password
+    res.status(200).json({
+      status: "success",
+      data: safeUser,
+    });
+  } else {
+    res.status(404).json({ message: "User not found" });
+  }
 };
 
 export const deleteUser = catchAsync(
@@ -68,7 +73,8 @@ export const protect = (
   res: Response,
   next: NextFunction
 ): void => {
-  const token = req.headers.authorization?.replace("Bearer ", "");
+  const token = req.cookies.jwt;
+  console.log("JWT cookie:- ", req.cookies.jwt);
   // Check if the token exists
   if (!token) {
     res.status(401).json({

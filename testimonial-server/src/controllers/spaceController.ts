@@ -25,6 +25,7 @@ export const createSpace = catchAsync(
       return;
     }
     const newSpace = await prisma.space.create({
+      //@ts-ignore
       data: {
         title,
         message,

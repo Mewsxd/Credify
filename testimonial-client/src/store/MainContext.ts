@@ -1,7 +1,15 @@
 import { createContext } from "react";
 
+type userDataType = {
+  id: number;
+  email: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+  spaces: [];
+};
 export type MainContextType = {
-  userData: {};
+  userData: userDataType;
   setUserData: (user: any) => void;
 };
 

@@ -39,6 +39,7 @@ model Testimony {
 
 model Space {
   id                Int       @id @default(autoincrement())
+  spaceName         String    @db.VarChar(50)
   title             String    @db.VarChar(100)
   message           String  
   createdAt         DateTime  @default(now()) 

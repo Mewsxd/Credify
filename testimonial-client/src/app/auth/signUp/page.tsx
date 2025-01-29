@@ -43,8 +43,9 @@ const SignUp = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+    // console.log(values);
     const data = values;
+    //@ts-ignore
     delete data.confirmPassword;
     const req = await fetch(server_url + "/auth/signUp", {
       method: "POST",
