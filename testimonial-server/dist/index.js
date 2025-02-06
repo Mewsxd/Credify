@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.prisma = void 0;
+exports.uploadToSupabase = uploadToSupabase;
 const express_1 = __importDefault(require("express"));
 const client_1 = require("@prisma/client");
 const user_1 = __importDefault(require("./routes/user"));
@@ -54,26 +55,54 @@ app.get("/api/swap-price", (req, res) => __awaiter(void 0, void 0, void 0, funct
 }));
 // Middleware to parse JSON bodies
 app.use(express_1.default.json());
+app.use(express_1.default.urlencoded({ extended: false }));
 app.use("/api/user", user_1.default);
 app.use("/api/auth", authRoutes_1.default);
 app.use("/api/space", spaceRoutes_1.default);
 app.use("/api/testimony", testimonyRoutes_1.default);
 app.use("*", invalidRouteHandler_1.invalidRouteHandler);
 app.use(errorHandler_1.errorHandler);
-function uploadFile(file) {
+// Configure multer for file uploads
+// const storage = multer.memoryStorage();
+// const upload = multer({ storage });
+// async function uploadFile(file: any) {
+//   // const filePath = `uploads/${Date.now()}-${file.originalname}`;
+//   const { data, error } = await supabase.storage
+//     .from("testimony-vids")
+//     .upload(file, file.buffer);
+//   if (error) {
+//     console.error("Upload error", error);
+//   } else {
+//     console.log("File uploaded", data);
+//   }
+// }
+function uploadToSupabase(fileBuffer, fileName, bucketName, contentType) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { data, error } = yield supabase_1.default.storage
-            .from("testimony-vids")
-            .upload("images", file);
-        if (error) {
-            console.error("Upload error", error);
+        try {
+            const filePath = `uploads/${Date.now()}-${fileName}`;
+            // Upload to Supabase Storage
+            const { data, error } = yield supabase_1.default.storage
+                .from(bucketName)
+                .upload(filePath, fileBuffer, {
+                contentType,
+            });
+            if (error) {
+                console.error("Upload error:", error);
+                return null;
+            }
+            // Generate a public URL
+            const { data: publicUrlData } = supabase_1.default.storage
+                .from(bucketName)
+                .getPublicUrl(filePath);
+            return publicUrlData.publicUrl;
         }
-        else {
-            console.log("File uploaded", data);
+        catch (err) {
+            console.error("Unexpected error:", err);
+            return null;
         }
     });
 }
-uploadFile("C:/Users/Shagufa/Pictures/logo.png");
+// uploadFile("C:/Users/Shagufa/Pictures/merced river osemite.jpg");
 // async function main() {
 //   // ... you will write your Prisma Client queries here
 //   try {

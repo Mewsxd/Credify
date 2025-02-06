@@ -21,6 +21,7 @@ model User {
   createdAt DateTime @default(now())              // Timestamp for when the user was created
   updatedAt DateTime @updatedAt                   // Automatically updated timestamp
   spaces    Space[]
+  image     String?
 }
 
 model Testimony {
@@ -51,6 +52,13 @@ model Space {
   collectRating     Boolean
   theme             Boolean
   buttonColor       String?
+  spaceImage        String?
+  collectionType    String
+  collectStarRating Boolean
+  darkTheme         Boolean
+  // textAndVideo      Boolean
+  // textOnly          Boolean
+  // videoOnly         Boolean
   user              User      @relation(fields: [userId], references: [id])
   testimonies       Testimony[]
   userId            Int        
